@@ -95,7 +95,7 @@ def test_vendor_a_pdf_and_excel(demo_data_dir: Path, standard_rfq: Dict[str, Any
 
 def test_vendor_b_pdf_and_excel_anomalies(demo_data_dir: Path, standard_rfq: Dict[str, Any]):
     """Verify Vendor B (BudgetByte) triggers delivery violation and grand total mismatch."""
-    pdf_path = demo_data_dir / "vendor_b_quotation.pdf"
+    pdf_path = demo_data_dir / "vendor_b_budgetbyte_quotation.pdf"
     excel_path = demo_data_dir / "vendor_b_quotation.xlsx"
 
     # PDF check
