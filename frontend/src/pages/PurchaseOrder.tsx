@@ -34,11 +34,17 @@ export function PurchaseOrder() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Purchase Order</h1>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => window.print()}
+          >
             <Download className="w-4 h-4 mr-2" />
             PDF
           </Button>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => window.print()}
+          >
             <Printer className="w-4 h-4 mr-2" />
             Print
           </Button>
