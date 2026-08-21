@@ -39,7 +39,7 @@ export function QuotationUpload() {
   };
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (isAnalyzing && analysisStep < steps.length) {
       timer = setTimeout(() => {
         setAnalysisStep(prev => prev + 1);

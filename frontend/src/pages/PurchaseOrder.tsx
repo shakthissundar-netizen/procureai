@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '../components/ui';
+import { useEffect, useRef, useState } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas'; import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '../components/ui';
 import { api } from '../services/api';
 import type { PurchaseOrder as POType } from '../types';
 import { Printer, Download, CheckCircle2, Building2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import { Printer, Download, CheckCircle2, Building2 } from 'lucide-react';
 export function PurchaseOrder() {
   const [po, setPo] = useState<POType | null>(null);
   const [loading, setLoading] = useState(true);
+  const poRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Usually we would pass the Vendor ID from context/state, 
@@ -18,6 +20,50 @@ export function PurchaseOrder() {
       });
     });
   }, []);
+
+  const handleDownloadPDF = async () => {
+  if (!poRef.current) {
+    alert("Could not find the Purchase Order document.");
+    return;
+  }
+
+    try {
+      const canvas = await html2canvas(poRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save(`${po!.poNumber}.pdf`);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      alert('PDF generation failed. Check the browser console.');
+    }
+  };
 
   if (loading || !po) {
     return <div className="flex h-full items-center justify-center"><div className="animate-pulse flex flex-col items-center"><div className="h-8 w-8 bg-primary-500 rounded-full mb-4"></div></div></div>;
@@ -36,7 +82,7 @@ export function PurchaseOrder() {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={() => window.print()}
+            onClick={handleDownloadPDF}
           >
             <Download className="w-4 h-4 mr-2" />
             PDF
@@ -51,8 +97,9 @@ export function PurchaseOrder() {
         </div>
       </div>
 
-      <Card className="bg-white shadow-sm border-slate-200 print:shadow-none print:border-none">
-        <CardContent className="p-8 md:p-12">
+      <div ref={poRef}>
+  <Card className="bg-white shadow-sm border-slate-200 print:shadow-none print:border-none">
+          <CardContent className="p-8 md:p-12">
           {/* Header */}
           <div className="flex justify-between items-start border-b border-slate-200 pb-8 mb-8">
             <div>
@@ -137,6 +184,7 @@ export function PurchaseOrder() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
